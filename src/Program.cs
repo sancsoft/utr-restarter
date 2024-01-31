@@ -42,21 +42,31 @@
                 var obj = JsonObject.Parse(response.Content ?? "");
                 if (obj?["stat"]?.ToString().ToLower() == "ok")
                 {
-                    Console.WriteLine($"Process {settings.ProcessName} is reporting OK on UTR.");
+                    var value = obj?["monitors"]?[0];
+                    value = value?["status"] ?? "";
+                    if (value.ToString() == "2")
+                    {
+                        Console.WriteLine($"Process {settings.ProcessName} is reporting OK on UTR.");
+                    }
+                    else
+                    {
+
+                        foreach (var process in Process.GetProcessesByName(settings.ProcessName))
+                        {
+                            Console.WriteLine($"Killing process {process.ProcessName}");
+                            process.Kill();
+                        }
+
+                        Console.WriteLine("Waiting for process to clean up");
+                        Thread.Sleep(settings.Pause);
+
+                        Console.WriteLine($"Running program {settings.Run} with {settings.Args}");
+                        Process.Start(settings.Run, settings.Args);
+                    }
                 }
                 else
                 {
-                    foreach (var process in Process.GetProcessesByName(settings.ProcessName))
-                    {
-                        Console.WriteLine($"Killing process {process.ProcessName}");
-                        process.Kill();
-                    }
-
-                    Console.WriteLine("Waiting for process to clean up");
-                    Thread.Sleep(settings.Pause);
-
-                    Console.WriteLine($"Running program {settings.Run} with {settings.Args}");
-                    Process.Start(settings.Run, settings.Args);
+                    Console.WriteLine($"Process {settings.ProcessName} is not reporting status.");
                 }
             }
             else
