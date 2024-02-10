@@ -21,10 +21,11 @@
     {
         static void Main(string[] args)
         {
+            string currentYear = DateTime.Now.Year.ToString();
             Console.WriteLine("UTR-Restarter: Uptime Robot Triggered Process Restart");
-            Console.WriteLine("Copyright (c) 2024 - )|( Sanctuary Software Studio, Inc. - All rights reserved.");
+            Console.WriteLine($"Copyright (c) {currentYear} - )|( Sanctuary Software Studio, Inc. - All rights reserved.");
 
-            IConfigurationRoot config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            IConfigurationRoot config = new ConfigurationBuilder().AddJsonFile("appsettings-sample.json").Build();
             AppSettings settings = config.GetRequiredSection("Settings").Get<AppSettings>() ?? new AppSettings();
 
             var restClientOptions = new RestClientOptions("https://api.uptimerobot.com/v2");
