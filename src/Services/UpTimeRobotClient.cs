@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text.Json.Nodes;
-using System.Threading;
+﻿using System.Text.Json.Nodes;
 using RestSharp;
 namespace UTR_Restarter
 {

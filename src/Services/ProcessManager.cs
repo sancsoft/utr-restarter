@@ -19,6 +19,10 @@ namespace UTR_Restarter
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Restarts the process if the monitor indicates it is down.
+        /// </summary>
+        /// <param name="isMonitorUp">A flag indicating whether the monitor is up.</param>
         public void RestartProcessIfNeeded(bool isMonitorUp)
         {
             if (!isMonitorUp)
@@ -29,6 +33,10 @@ namespace UTR_Restarter
             }
         }
 
+        /// <summary>
+        /// Kills all processes with the specified name.
+        /// </summary>
+        /// <param name="processName">The name of the process to kill.</param>
         private void KillProcess(string processName)
         {
             try
@@ -45,6 +53,12 @@ namespace UTR_Restarter
             }
         }
 
+
+        /// <summary>
+        /// Starts a process using the specified command and arguments.
+        /// </summary>
+        /// <param name="command">The command or executable to start.</param>
+        /// <param name="arguments">The arguments to pass to the executable.</param>
         private void StartProcess(string command, string arguments)
         {
             logger.Log(LogLevel.Information, $"Running program {command} with {arguments}");

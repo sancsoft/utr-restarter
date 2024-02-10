@@ -1,9 +1,8 @@
-﻿using System;
-namespace UTR_Restarter
+﻿namespace UTR_Restarter
 {
     public class ConsoleStartupMessageHandler : IStartupMessageHandler
     {
-        ILogger logger;
+        private readonly ILogger logger;
 
         public ConsoleStartupMessageHandler(ILogger logger)
         {
@@ -15,6 +14,11 @@ namespace UTR_Restarter
             string currentYear = DateTime.Now.Year.ToString();
             logger.Log(LogLevel.Information, "UTR-Restarter: Uptime Robot Triggered Process Restart");
             logger.Log(LogLevel.Information, $"Copyright (c) {currentYear} - )|( Sanctuary Software Studio, Inc. - All rights reserved.");
+        }
+
+        void IStartupMessageHandler.DisplayStartupMessages()
+        {
+            throw new NotImplementedException();
         }
     }
 
