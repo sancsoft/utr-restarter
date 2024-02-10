@@ -15,6 +15,12 @@ namespace UTR_Restarter
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Checks if the monitor associated with the provided ID is up
+        /// </summary>
+        /// <param name="monitorID">The unique identifier for the monitor to check</param>
+        /// <param name="processName">The name of the process being monitored</param>
+        /// <returns>true if the monitor is up.</returns>
         public bool IsMonitorUp(int monitorID, string processName)
         {
             var request = new RestRequest("getMonitors", Method.Post)
