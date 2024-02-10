@@ -16,9 +16,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
+    <None Remove="Configurations\" />
+    <None Remove="Interfaces\" />
+    <None Remove="Logging\" />
+    <None Remove="Services\" />
+    <None Remove="Utils\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings-sample.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configurations\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Logging\" />
+    <Folder Include="Services\" />
+    <Folder Include="Utils\" />
+  </ItemGroup>
 </Project>

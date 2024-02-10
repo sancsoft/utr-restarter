@@ -1,78 +1,36 @@
 ﻿namespace UTR_Restarter
 {
-    using System;
-    using System.Diagnostics;
-    using System.Text.Json.Nodes;
     using Microsoft.Extensions.Configuration;
     using RestSharp;
-
-    public sealed class AppSettings
-    {
-        public AppSettings() { Monitor = 0; ApiKey = ""; ProcessName = ""; Pause = 0; Run = ""; Args = ""; }
-        public int Monitor { get; set; }
-        public string ApiKey { get; set; }
-        public string ProcessName { get; set; }
-        public int Pause { get; set; }
-        public string Run { get; set; }
-        public string Args { get; set; }
-    }
 
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("UTR-Restarter: Uptime Robot Triggered Process Restart");
-            Console.WriteLine("Copyright (c) 2024 - )|( Sanctuary Software Studio, Inc. - All rights reserved.");
+            // Initialize the Console Logger for application-wide logging
+            ILogger logger = new ConsoleLogger();
 
-            IConfigurationRoot config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            // Set up the startup message handler with the logger and display startup messages
+            var messageHandler = new ConsoleStartupMessageHandler(logger);
+            messageHandler.DisplayStartupMessages();
+
+            // Load the application settings from the 'appsettings-sample.json' file
+            IConfigurationRoot config = new ConfigurationBuilder().AddJsonFile("appsettings-sample.json").Build();
             AppSettings settings = config.GetRequiredSection("Settings").Get<AppSettings>() ?? new AppSettings();
 
-            var restClientOptions = new RestClientOptions("https://api.uptimerobot.com/v2");
-            var restClient = new RestClient(restClientOptions);
-            var request = new RestRequest("getMonitors", Method.Post);
-            request.AddParameter("format", "json");
-            request.AddParameter("monitors", settings.Monitor);
-            request.AddParameter("api_key", settings.ApiKey);
-            var response = restClient.Execute(request);
+            // Initialize the Uptime Robot client with API key and logger
+            var uptimeRobotClient = new UpTimeRobotClient("https://api.uptimerobot.com/v2", settings.ApiKey, logger);
 
-            Console.WriteLine($"Checking monitor #{settings.Monitor}");
+            // Set up the process manager with the necessary settings and logger
+            var processManager = new ProcessManager(settings.ProcessName, settings.Run, settings.Args, settings.Pause, logger);
 
-            if (response.IsSuccessful)
-            {
-                var obj = JsonObject.Parse(response.Content ?? "");
-                if (obj?["stat"]?.ToString().ToLower() == "ok")
-                {
-                    var value = obj?["monitors"]?[0];
-                    value = value?["status"] ?? "";
-                    if (value.ToString() == "2")
-                    {
-                        Console.WriteLine($"Process {settings.ProcessName} is reporting OK on UTR.");
-                    }
-                    else
-                    {
+            // Log the action of checking the Uptime Robot monitor status
+            logger.Log(LogLevel.Information, $"Checking monitor #{settings.Monitor}");
 
-                        foreach (var process in Process.GetProcessesByName(settings.ProcessName))
-                        {
-                            Console.WriteLine($"Killing process {process.ProcessName}");
-                            process.Kill();
-                        }
-
-                        Console.WriteLine("Waiting for process to clean up");
-                        Thread.Sleep(settings.Pause);
-
-                        Console.WriteLine($"Running program {settings.Run} with {settings.Args}");
-                        Process.Start(settings.Run, settings.Args);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Process {settings.ProcessName} is not reporting status.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Unable to reach Uptime Robot.");
-            }
+            // Check if the monitored service is up and restart it if needed
+            bool isMonitorUp = uptimeRobotClient.IsMonitorUp(settings.Monitor, settings.ProcessName);
+            processManager.RestartProcessIfNeeded(!isMonitorUp);
         }
-     }
+    }
+
 }
